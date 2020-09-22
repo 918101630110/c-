@@ -39,6 +39,10 @@ int main() {
 	int send_len = 0;
 	int recv_len = 0;
 	//定义发送缓冲区和接受缓冲区
+	char yi[100] = { '1' };
+	char er[100] = { '2' };
+	char san[100] = { '3' };
+	char zero[100] = { '0' };
 	char send_buf[100];
 	char recv_buf[100];
 	//定义服务端套接字，接受请求套接字
@@ -49,7 +53,7 @@ int main() {
 	//填充服务端信息
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_addr.S_un.S_addr = inet_addr("127.0.0.1");
-	server_addr.sin_port = htons(9999);
+	server_addr.sin_port = htons(8000);
 	//创建套接字
 	s_server = socket(AF_INET, SOCK_STREAM, 0);
 	if (connect(s_server, (SOCKADDR*)&server_addr, sizeof(SOCKADDR)) == SOCKET_ERROR) {
@@ -75,13 +79,12 @@ int main() {
 		cout << endl << endl << "请选择功能：" << endl << "1.查询余票/购票     2.查询车票      3.退票" << endl;
 
 		cin >> send_buf;
-		char func1 = send_buf[0];   //func1记录功能
-		if (func1 == '1') {
+		if (!strcmp(send_buf, yi)) {
 			send_len = send(s_server, send_buf, 100, 0);
 			if (send_len < 0) {
 				break;
 			}
-			recv_len = recv(s_server, recv_buf, 100, 0); 
+			recv_len = recv(s_server, recv_buf, 100, 0);
 			if (recv_len < 0) {
 				break;
 			}
@@ -100,17 +103,22 @@ int main() {
 			else {
 				cout << recv_buf << endl;  //票务信息
 			}
-			if (recv_buf[0] == '1' || recv_buf[0] == '2') {
-				send_buf[0] = '0';
-				send_len = send(s_server, send_buf, 100, 0);//无法继续购票 相当于直接跳过
+			if (recv_buf[0] == '1' || recv_buf[0] == '2') {    //此处 12与功能无关
 				continue;
 			}
-			cin>>send_buf;         //输入1或0选择购票与否
-			if (send_buf[0] == '0') {
-				cout << "欢迎下次使用！" << endl;
+			cin >> send_buf;   //输入1  0购票与否
+			if (strcmp(send_buf, yi) && strcmp(send_buf, zero)) {
+				send_buf[0] = '0';
 				send_len = send(s_server, send_buf, 100, 0);
+				cout << "无效的功能编号！" << endl;
 				continue;
-			}//不买票就直接退出
+			}
+			if (!strcmp(send_buf, zero)) {
+				send_buf[0] = '0';
+				send_len = send(s_server, send_buf, 100, 0);
+				cout << "欢迎下次使用！";
+				continue;
+			}
 			send_len = send(s_server, send_buf, 100, 0);
 			if (send_len < 0) {
 				break;
@@ -137,11 +145,91 @@ int main() {
 			cin >> send_buf;//输入身份证号
 			send_len = send(s_server, send_buf, 100, 0);
 		}
-		else if (func1 == '2') {
+
+		else if (!strcmp(send_buf, er)) {                      //选择了查询功能
+			send_len = send(s_server, send_buf, 100, 0);
+			if (send_len < 0) {
+				break;
+			}
+			recv_len = recv(s_server, recv_buf, 100, 0);
+			if (recv_len < 0) {
+				break;
+			}
+			else {
+				cout << recv_buf << endl;   //请输入查询方式
+			}
+			cin >> send_buf;             //输入方式
+			if (strcmp(send_buf, yi) && strcmp(send_buf, er)) {
+				send_buf[0] = '0';
+				send_len = send(s_server, send_buf, 100, 0);
+				cout << "无效的功能编号！" << endl;
+				continue;
+			}
+			send_len = send(s_server, send_buf, 100, 0);
+			if (send_len < 0) {
+				break;
+			}
+			recv_len = recv(s_server, recv_buf, 100, 0);
+			if (recv_len < 0) {
+				break;
+			}
+			else {
+				cout << recv_buf << endl;  //请输入姓名/身份证号
+			}
+			cin >> send_buf;             //输入姓名/身份证号
+			send_len = send(s_server, send_buf, 100, 0);
+			if (send_len < 0) {
+				break;
+			}
+			recv_len = recv(s_server, recv_buf, 100, 0);
+			if (recv_len < 0) {
+				break;
+			}
+			else {
+				cout << recv_buf << endl;  //输出信息
+			}
 
 		}
-		else if (func1 == '3') {
-
+		else if (!strcmp(send_buf, san)) {
+			send_len = send(s_server, send_buf, 100, 0);
+			if (send_len < 0) {
+				break;
+			}
+			recv_len = recv(s_server, recv_buf, 100, 0);
+			if (recv_len < 0) {
+				break;
+			}
+			else {
+				cout << recv_buf << endl;  //输入  1  2选择退票方式
+			}
+			cin >> send_buf;
+			if (strcmp(send_buf, yi) && strcmp(send_buf, er)) {
+				send_buf[0] = '0';
+				send_len = send(s_server, send_buf, 100, 0);
+				cout << "无效的功能编号！" << endl;
+				continue;
+			}
+			send_len = send(s_server, send_buf, 100, 0);   //发送退票方式
+			if (send_len < 0) {
+				break;
+			}
+			recv_len = recv(s_server, recv_buf, 100, 0);  //请输入姓名/身份证号
+			cout << recv_buf << endl;
+			if (recv_len < 0) {
+				break;
+			}
+			cin >> send_buf;             //输入姓名/身份证号
+			send_len = send(s_server, send_buf, 100, 0);
+			if (send_len < 0) {
+				break;
+			}
+			recv_len = recv(s_server, recv_buf, 100, 0);
+			if (recv_len < 0) {
+				break;
+			}
+			else {
+				cout << recv_buf << endl;  //输出退票信息
+			}
 		}
 		else
 			cout << "无效的功能编号！" << endl;
